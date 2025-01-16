@@ -1,1 +1,1 @@
-web sockent
+Web Socket
