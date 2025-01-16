@@ -17,7 +17,7 @@ export const DarkModeToggle = () => {
   }, [isDarkMode]);
   return (
     <button
-      className="m-4 p-4 bg-gray-300 dark:bg-gray-700 rounded"
+      className="m-2 p-2 bg-gray-800 text-white dark:bg-gray-700 rounded"
       onClick={() => {
         setIsDarkMode(!isDarkMode);
       }}

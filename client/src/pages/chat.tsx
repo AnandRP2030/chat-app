@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, FormHTMLAttributes } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 export const Chat = () => {
   const [socket, setSocket] = useState();
