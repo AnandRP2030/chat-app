@@ -7,7 +7,7 @@ function App() {
       <div className="absolute top-5 right-5">
         <DarkModeToggle />
       </div>
-      <div className="flex items-center min-h-screen max-w-xl mx-auto">
+      <div className="flex items-center min-h-screen min-w-2xl md:max-w-xl  mx-auto">
         <CreateNewRoom />
       </div>
     </div>

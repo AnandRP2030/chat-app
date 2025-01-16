@@ -7,7 +7,13 @@ export default {
   ],
   darkMode: "class",
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        chatGray: {
+          "500": "#262626"
+        }
+      }
+    },
   },
   plugins: [],
 }
