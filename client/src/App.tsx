@@ -1,4 +1,4 @@
-import { CreateNewRoom } from "./components/room/createNewRoom";
+import { Room } from "./components/room/room";
 import { DarkModeToggle } from "./config/theme";
 import "./App.css";
 function App() {
@@ -8,7 +8,7 @@ function App() {
         <DarkModeToggle />
       </div>
       <div className="flex items-center min-h-screen min-w-2xl md:max-w-xl  mx-auto">
-        <CreateNewRoom />
+        <Room />
       </div>
     </div>
   );

@@ -1,10 +1,9 @@
 import React, { useRef, useState } from "react";
-import { ChatIcon } from "../../assets/icons/ChatIcon";
 import { CopyIcon } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { ShowToast } from "../../types/showToast";
 
-export const CreateNewRoom = () => {
+export const CreateRoom = () => {
   const [isRoomIdAvail, setIsRoomIdAvail] = useState(false);
   const inputNameRef = useRef<HTMLInputElement>(null);
   const inputRoomIdRef = useRef<HTMLInputElement>(null);
@@ -38,9 +37,7 @@ export const CreateNewRoom = () => {
     e.preventDefault();
     const username = inputNameRef.current ? inputNameRef.current.value : "";
     const roomId = inputRoomIdRef.current ? inputRoomIdRef.current.value : "";
-    console.log("test");
     if (!username) {
-      console.log("test 2");
       showToast({
         icon: "🥲",
         toastMsg: "Please enter your name",
@@ -58,19 +55,7 @@ export const CreateNewRoom = () => {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="border-black border-2 shadow-md rounded-md dark:border-gray-500 mx-auto w-full p-3"
-    >
-      <div className="flex items-center">
-        <span>
-          <ChatIcon />
-        </span>
-        <p className="ms-2  text-lg"> Chat with your friends!</p>
-      </div>
-      <p className="text-xs mt-2">
-        It's a quick chat application, we won't save your data.
-      </p>
+    <form onSubmit={handleSubmit}>
       <button
         type="button"
         onClick={createRoomId}
@@ -93,7 +78,7 @@ export const CreateNewRoom = () => {
         />
         <button
           type="submit"
-          className="w-2/12 bg-black hover:text-red-500 hover:shadow-sm text-white h-10 text-sm border-none ml-3"
+          className="w-2/12 bg-black dark:bg-white text-white dark:text-black hover:shadow h-8  text-sm border-none ml-3"
         >
           Join Room
         </button>
