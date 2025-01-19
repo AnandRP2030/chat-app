@@ -1,4 +1,5 @@
 import { WebSocketServer, WebSocket } from "ws";
+import { createRoomId } from "./utils/createRoomId";
 const wss = new WebSocketServer({ port: 8080 });
 
 interface Room {
@@ -11,6 +12,12 @@ wss.on("connection", (socket: WebSocket) => {
   socket.on("message", (message: string) => {
     try {
       const parsedMessage = JSON.parse(message.toString());
+
+      if (parsedMessage.type === "create") {
+        const roomId = createRoomId();
+        socket.send(roomId)
+      }
+
       if (parsedMessage.type === "join") {
         const previousMembersOnSameRoom = allSockets.filter(
           (room: Room) => room.roomId === parsedMessage.payload.roomId
