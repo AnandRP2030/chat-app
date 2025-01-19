@@ -10,8 +10,14 @@ export const Room = () => {
   };
   return (
     <div className=" border-2 border-gray-400 border-opacity-30 rounded-md mx-auto w-full p-3">
-      <RoomHeading />
-      <div>{isJoined ? <ChatRoom /> : <CreateRoom joinRoom={joinRoom} />}</div>
+      <RoomHeading joinRoom={joinRoom} />
+      <div>
+        {isJoined ? (
+          <ChatRoom/>
+        ) : (
+          <CreateRoom joinRoom={joinRoom} />
+        )}
+      </div>
     </div>
   );
 };

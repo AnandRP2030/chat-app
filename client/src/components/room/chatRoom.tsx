@@ -27,16 +27,11 @@ export const ChatRoom = () => {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chats]);
-  const {
-    register,
-    handleSubmit,
-    watch,
-    reset,
-  } = useForm<MessageInputs>();
+
+  const { register, handleSubmit, watch, reset } = useForm<MessageInputs>();
+
   const onSendMessage: SubmitHandler<MessageInputs> = (data) => {
-    console.log(data);
     const msgLength = data.message.length;
-    console.log("msg", msgLength);
     if (msgLength > 50) {
       console.log("msg", msgLength);
       showToast({
@@ -62,7 +57,8 @@ export const ChatRoom = () => {
       <div className="text-xs h-10 mt-5 bg-chatGray-500 text-white p-4 flex justify-between items-center">
         <p className="flex space-x-3">
           Room Id: <span> DBS004 </span>
-          <span className="cursor-pointer">
+          
+          <span className="cursor-pointer" > 
             <CopyIcon size={16} />
           </span>
         </p>
