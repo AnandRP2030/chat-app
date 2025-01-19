@@ -11,6 +11,12 @@ export default {
       colors: {
         chatGray: {
           "500": "#262626"
+        },
+        chatWhite: {
+          "600": "#fafafa"
+        },
+        chatBlack: {
+          "600": "#262626"
         }
       }
     },
