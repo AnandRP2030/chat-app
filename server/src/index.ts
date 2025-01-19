@@ -1,6 +1,11 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { createRoomId } from "./utils/createRoomId";
 import { JOINING_STATUS, SocketMessagesType } from "./types";
+import dotenv from 'dotenv';
+import { connectDb } from "./db/connectDb";
+import {MessageModel} from './models/Message'
+dotenv.config();
+connectDb();
 const wss = new WebSocketServer({ port: 8080 });
 
 interface Room {
@@ -14,7 +19,7 @@ let rooms = new Map<string, Room>();
 wss.on("connection", (socket: WebSocket) => {
   console.log("Client connected");
 
-  socket.on("message", (message: string) => {
+  socket.on("message", async (message: string) => {
     try {
       const parsedMessage = JSON.parse(message.toString());
 
@@ -69,13 +74,23 @@ wss.on("connection", (socket: WebSocket) => {
         const { roomId, username, message } = parsedMessage.payload;
         const room = rooms.get(roomId);
         if (!room) return;
+        const savedMessage = new MessageModel({
+          roomId, 
+          username,
+          message,
+        });
 
+        await savedMessage.save();
+
+        
         const chatMessage = { username, message };
         room.messages.push(chatMessage);
         const res = {
           type: SocketMessagesType.CHAT,
-          username,
-          message,
+          newMessage: {
+            username,
+            message,
+          },
         };
         room.clients.forEach((client) => {
           client.send(JSON.stringify(res));

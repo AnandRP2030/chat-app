@@ -1,9 +1,7 @@
 import { ChatIcon } from "../../assets/icons/ChatIcon";
-
-// todo remove this props 
-export const RoomHeading = ({joinRoom}: {joinRoom: () => void}) => {
+export const RoomHeading = () => {
   return (
-    <div onClick={joinRoom}>
+    <div>
       <div className="flex items-center">
         <span>
           <ChatIcon />

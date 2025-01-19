@@ -3,8 +3,9 @@ import { showToast } from "../../config/toast";
 import { DisplayRoomId } from "../displayRoomId/displayRoomId";
 import { ToastIcons, ToastMessages } from "../../types/showToast";
 import { useWebSocket } from "../../hooks/useWebsocket";
-import { SocketMessagesType } from "../../types/wsTypes";
+import { JOINING_STATUS, SocketMessagesType } from "../../types/wsTypes";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { UserData } from "../../types/userTypes";
 
 interface JoinRoomForm {
   username: string;
@@ -19,17 +20,19 @@ interface JoinRoomType {
   };
 }
 
-export const CreateRoom = ({
-  navigateToChat,
-}: {
+interface CreateRoomProps {
+  changeUserDetails: (data: UserData) => void;
   navigateToChat: () => void;
-}) => {
+}
+
+export const CreateRoom = ({
+  changeUserDetails,
+  navigateToChat,
+}: CreateRoomProps) => {
   const [roomId, setRoomId] = useState("");
   const { ws } = useWebSocket();
   const {
     register,
-    watch,
-    reset,
     formState: { errors },
     handleSubmit,
   } = useForm<JoinRoomForm>();
@@ -61,7 +64,8 @@ export const CreateRoom = ({
       }
 
       if (data.type === SocketMessagesType.JOIN) {
-        if (data.joiningStatus === "success") {
+        if (data.joiningStatus === JOINING_STATUS.SUCCESS) {
+          
           navigateToChat();
           showToast({
             icon: ToastIcons.ROOM_JOINED,
@@ -83,13 +87,10 @@ export const CreateRoom = ({
   }, [ws]);
 
   const onJoinRoom: SubmitHandler<JoinRoomForm> = (data) => {
-    const { username, roomId } = data;
+    changeUserDetails(data);
     const joiningRoomData: JoinRoomType = {
       type: SocketMessagesType.JOIN,
-      payload: {
-        username,
-        roomId,
-      },
+      payload: data,
     };
     if (ws) {
       ws.send(JSON.stringify(joiningRoomData));
