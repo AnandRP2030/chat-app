@@ -10,13 +10,10 @@ function App() {
 
   // creaet connection
   useEffect(() => {
-    console.log("ws", ws);
-    console.log("ws state", ws?.readyState);
 
     if (ws && ws.readyState === WebSocket.OPEN) {
       console.log('Socket Opened.')
     }
-    // if (ws && ws.readyState )
   }, [ws, ws?.readyState]);
   return (
     <div className="min-h-screen bg-white  text-black dark:bg-black dark:text-white p-4">

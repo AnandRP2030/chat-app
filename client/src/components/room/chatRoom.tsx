@@ -33,7 +33,6 @@ export const ChatRoom = () => {
   const onSendMessage: SubmitHandler<MessageInputs> = (data) => {
     const msgLength = data.message.length;
     if (msgLength > 50) {
-      console.log("msg", msgLength);
       showToast({
         icon: "🥲",
         toastMsg: "Please send small messages.",

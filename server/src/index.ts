@@ -1,5 +1,6 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { createRoomId } from "./utils/createRoomId";
+import { JOINING_STATUS, SocketMessagesType } from "./types";
 const wss = new WebSocketServer({ port: 8080 });
 
 interface Room {
@@ -13,31 +14,53 @@ wss.on("connection", (socket: WebSocket) => {
     try {
       const parsedMessage = JSON.parse(message.toString());
 
-      if (parsedMessage.type === "create") {
+      if (parsedMessage.type === SocketMessagesType.CREATE) {
         const roomId = createRoomId();
-        socket.send(roomId)
-      }
-
-      if (parsedMessage.type === "join") {
-        const previousMembersOnSameRoom = allSockets.filter(
-          (room: Room) => room.roomId === parsedMessage.payload.roomId
-        );
-
+        const resObj = {
+          type: SocketMessagesType.CREATE,
+          roomId,
+        };
         allSockets.push({
           socket,
-          roomId: parsedMessage.payload.roomId,
+          roomId,
         });
 
-        previousMembersOnSameRoom.forEach((room: Room) => {
-          room.socket.send(`A new guy joined on ${parsedMessage.payload.roomId}`);
-        });
-
-        socket.send(
-          `You have successfully joined the room ${parsedMessage.payload.roomId}`
-        );
+        socket.send(JSON.stringify(resObj));
       }
 
-      if (parsedMessage.type === "chat") {
+      if (parsedMessage.type === SocketMessagesType.JOIN) {
+        const {roomId, username} = parsedMessage.payload;
+
+        const existingRoom = allSockets.find(
+          (socket) => socket.roomId === roomId
+        );
+        
+
+        //todo => add username to the allsocket.
+
+        if (!existingRoom) {
+          const errorResponse = {
+            type: SocketMessagesType.JOIN,
+            message: `Inavlid room Id  ${roomId}`,
+            joiningStatus: JOINING_STATUS.FAILED,
+          };
+          socket.send(JSON.stringify(errorResponse));
+          console.log(
+            `Failed join attempt: Invalid room ID ${roomId} for user ${username}`
+          );
+
+          return;
+        }
+
+        const successResponse = {
+          type: SocketMessagesType.JOIN,
+          message: `You are successfully joined the room ${parsedMessage.payload.roomId}`,
+          joiningStatus: JOINING_STATUS.SUCCESS,
+        };
+        socket.send(JSON.stringify(successResponse));
+      }
+
+      if (parsedMessage.type === SocketMessagesType.CHAT) {
         const currentUserRooms = allSockets.filter(
           (room: Room) => room.roomId === parsedMessage.payload.roomId
         );

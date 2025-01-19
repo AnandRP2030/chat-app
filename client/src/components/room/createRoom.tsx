@@ -1,55 +1,121 @@
-import React, { useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { showToast } from "../../config/toast";
 import { DisplayRoomId } from "../displayRoomId/displayRoomId";
+import { ToastIcons, ToastMessages } from "../../types/showToast";
+import { useWebSocket } from "../../hooks/useWebsocket";
+import { SocketMessagesType } from "../../types/wsTypes";
+import { SubmitHandler, useForm } from "react-hook-form";
 
-interface CreateRoomProps {
-  joinRoom: () => void;
+interface JoinRoomForm {
+  username: string;
+  roomId: string;
 }
 
-export const CreateRoom = ({ joinRoom }: CreateRoomProps) => {
-  const [isRoomIdAvail, setIsRoomIdAvail] = useState(false);
-  const inputNameRef = useRef<HTMLInputElement>(null);
-  const inputRoomIdRef = useRef<HTMLInputElement>(null);
+interface JoinRoomType {
+  type: string;
+  payload: {
+    username: string;
+    roomId: string;
+  };
+}
+
+export const CreateRoom = ({
+  navigateToChat,
+}: {
+  navigateToChat: () => void;
+}) => {
+  const [roomId, setRoomId] = useState("");
+  const { ws } = useWebSocket();
+  const {
+    register,
+    watch,
+    reset,
+    formState: { errors },
+    handleSubmit,
+  } = useForm<JoinRoomForm>();
   const createRoomId = () => {
-    setIsRoomIdAvail(true);
-    showToast({
-      icon: "😍",
-      toastMsg: "Room Created successfully.",
-    });
-  };
-
-  const copyRoomId = () => {
-    showToast({
-      icon: "😊",
-      toastMsg: "Room id copy to clipboard.",
-    });
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const username = inputNameRef.current ? inputNameRef.current.value : "";
-    const roomId = inputRoomIdRef.current ? inputRoomIdRef.current.value : "";
-    if (!username) {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
       showToast({
-        icon: "🥲",
-        toastMsg: "Please enter your name",
+        icon: ToastIcons.SERVER_ISSUE,
+        toastMsg: ToastMessages.SERVER_ISSUE,
+      });
+      console.log("WEB SOCKET is not opened.", ws);
+      return;
+    }
+
+    const createRoomIdObj = {
+      type: SocketMessagesType.CREATE,
+    };
+    ws.send(JSON.stringify(createRoomIdObj));
+  };
+
+  useEffect(() => {
+    if (!ws) {
+      return;
+    }
+
+    const onMessage = (event: MessageEvent) => {
+      const data = JSON.parse(event.data);
+      if (data.type === SocketMessagesType.CREATE) {
+        setRoomId(data.roomId);
+      }
+
+      if (data.type === SocketMessagesType.JOIN) {
+        if (data.joiningStatus === "success") {
+          navigateToChat();
+          showToast({
+            icon: ToastIcons.ROOM_JOINED,
+            toastMsg: ToastMessages.ROOM_JOINED,
+          });
+        } else {
+          showToast({
+            icon: ToastIcons.INVALID_ROOM_ID,
+            toastMsg: ToastMessages.INVALID_ROOM_ID,
+          });
+        }
+      }
+    };
+    ws.addEventListener("message", onMessage);
+
+    return () => {
+      ws.removeEventListener("message", onMessage);
+    };
+  }, [ws]);
+
+  const onJoinRoom: SubmitHandler<JoinRoomForm> = (data) => {
+    const { username, roomId } = data;
+    const joiningRoomData: JoinRoomType = {
+      type: SocketMessagesType.JOIN,
+      payload: {
+        username,
+        roomId,
+      },
+    };
+    if (ws) {
+      ws.send(JSON.stringify(joiningRoomData));
+    }
+  };
+
+  const handleValidation = () => {
+    if (errors.username) {
+      showToast({
+        icon: ToastIcons.ENTER_NAME,
+        toastMsg: errors.username.message || "",
       });
       return;
     }
 
-    if (!roomId) {
+    if (errors.roomId) {
       showToast({
-        icon: "👿",
-        toastMsg: "Please provide the  room id",
+        icon: ToastIcons.PROVIDE_ROOM_ID,
+        toastMsg: errors.roomId.message || "",
       });
       return;
     }
-
-    joinRoom();
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit(onJoinRoom, handleValidation)}>
       <button
         type="button"
         onClick={createRoomId}
@@ -58,14 +124,27 @@ export const CreateRoom = ({ joinRoom }: CreateRoomProps) => {
         Create New Room
       </button>
       <input
-        ref={inputNameRef}
+        {...register("username", {
+          required: ToastMessages.ENTER_NAME,
+          maxLength: {
+            value: 30,
+            message: "Maximum Length is 30",
+          },
+        })}
         className="w-full px-3 bg-transparent my-3 h-8 text-sm py-3 "
         type="text"
         placeholder="Enter your name"
       />
+
       <div className="flex justify-between items-center">
         <input
-          ref={inputRoomIdRef}
+          {...register("roomId", {
+            required: ToastMessages.PROVIDE_ROOM_ID,
+            pattern: {
+              value: /^\w{6}$/,
+              message: ToastMessages.INVALID_ROOM_ID,
+            },
+          })}
           className="w-10/12 px-3 bg-transparent my-3 h-8 text-sm py-3"
           type="text"
           placeholder="Enter room Id"
@@ -74,13 +153,11 @@ export const CreateRoom = ({ joinRoom }: CreateRoomProps) => {
           type="submit"
           className="w-2/12 bg-black dark:bg-white text-white dark:text-black hover:shadow h-8  text-sm border-none ml-3"
         >
-          Join Room
+          Join
         </button>
       </div>
 
-      {isRoomIdAvail && (
-        <DisplayRoomId copyRoomId={copyRoomId} roomId={"E483EA"} />
-      )}
+      {roomId && <DisplayRoomId roomId={roomId} />}
     </form>
   );
 };
