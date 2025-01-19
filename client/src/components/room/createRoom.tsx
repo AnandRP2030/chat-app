@@ -1,9 +1,12 @@
 import React, { useRef, useState } from "react";
-import { CopyIcon } from "lucide-react";
-import { toast } from "react-hot-toast";
-import { ShowToast } from "../../types/showToast";
+import { showToast } from "../../config/toast";
+import { DisplayRoomId } from "../displayRoomId/displayRoomId";
 
-export const CreateRoom = () => {
+interface CreateRoomProps {
+  joinRoom: () => void;
+}
+
+export const CreateRoom = ({ joinRoom }: CreateRoomProps) => {
   const [isRoomIdAvail, setIsRoomIdAvail] = useState(false);
   const inputNameRef = useRef<HTMLInputElement>(null);
   const inputRoomIdRef = useRef<HTMLInputElement>(null);
@@ -15,17 +18,6 @@ export const CreateRoom = () => {
     });
   };
 
-  const showToast = (data: ShowToast) => {
-    toast.success(data.toastMsg, {
-      icon: data.icon,
-      style: {
-        borderRadius: "10px",
-        background: "#333",
-        color: "#fff",
-        fontSize: "12px",
-      },
-    });
-  };
   const copyRoomId = () => {
     showToast({
       icon: "😊",
@@ -52,6 +44,8 @@ export const CreateRoom = () => {
       });
       return;
     }
+
+    joinRoom();
   };
 
   return (
@@ -85,19 +79,7 @@ export const CreateRoom = () => {
       </div>
 
       {isRoomIdAvail && (
-        <div className="h-20 bg-chatGray-500 text-white p-4 flex justify-center items-center flex-col">
-          <p className="text-sm">Share this code with your friend</p>
-          <div className="flex gap-5 justify-center mt-2">
-            <span>E483EA</span>
-            <button
-              type="button"
-              className="h-5 w-5 text-sm"
-              onClick={copyRoomId}
-            >
-              <CopyIcon />
-            </button>
-          </div>
-        </div>
+        <DisplayRoomId copyRoomId={copyRoomId} roomId={"E483EA"} />
       )}
     </form>
   );
