@@ -4,39 +4,41 @@ import { JOINING_STATUS, SocketMessagesType } from "./types";
 const wss = new WebSocketServer({ port: 8080 });
 
 interface Room {
-  socket: WebSocket;
   roomId: string;
+  clients: Set<WebSocket>;
+  messages: { username: string; message: string }[];
 }
 
-let allSockets: Room[] = [];
+let rooms = new Map<string, Room>();
+
 wss.on("connection", (socket: WebSocket) => {
+  console.log("Client connected");
+
   socket.on("message", (message: string) => {
     try {
       const parsedMessage = JSON.parse(message.toString());
 
       if (parsedMessage.type === SocketMessagesType.CREATE) {
         const roomId = createRoomId();
-        const resObj = {
+
+        rooms.set(roomId, {
+          roomId,
+          clients: new Set([socket]),
+          messages: [],
+        });
+
+        const successResponse = {
           type: SocketMessagesType.CREATE,
           roomId,
         };
-        allSockets.push({
-          socket,
-          roomId,
-        });
 
-        socket.send(JSON.stringify(resObj));
+        socket.send(JSON.stringify(successResponse));
       }
 
       if (parsedMessage.type === SocketMessagesType.JOIN) {
-        const {roomId, username} = parsedMessage.payload;
+        const { roomId, username } = parsedMessage.payload;
 
-        const existingRoom = allSockets.find(
-          (socket) => socket.roomId === roomId
-        );
-        
-
-        //todo => add username to the allsocket.
+        const existingRoom = rooms.get(roomId);
 
         if (!existingRoom) {
           const errorResponse = {
@@ -52,20 +54,31 @@ wss.on("connection", (socket: WebSocket) => {
           return;
         }
 
+        existingRoom.clients.add(socket);
+
         const successResponse = {
           type: SocketMessagesType.JOIN,
-          message: `You are successfully joined the room ${parsedMessage.payload.roomId}`,
+          message: `Successfully joined the room ${roomId}`,
           joiningStatus: JOINING_STATUS.SUCCESS,
+          previousMessages: existingRoom.messages,
         };
         socket.send(JSON.stringify(successResponse));
       }
 
       if (parsedMessage.type === SocketMessagesType.CHAT) {
-        const currentUserRooms = allSockets.filter(
-          (room: Room) => room.roomId === parsedMessage.payload.roomId
-        );
-        currentUserRooms.forEach((currRoom) => {
-          currRoom.socket.send(`${parsedMessage.payload.message}`);
+        const { roomId, username, message } = parsedMessage.payload;
+        const room = rooms.get(roomId);
+        if (!room) return;
+
+        const chatMessage = { username, message };
+        room.messages.push(chatMessage);
+        const res = {
+          type: SocketMessagesType.CHAT,
+          username,
+          message,
+        };
+        room.clients.forEach((client) => {
+          client.send(JSON.stringify(res));
         });
       }
     } catch (error) {
@@ -73,6 +86,15 @@ wss.on("connection", (socket: WebSocket) => {
     }
   });
   socket.on("close", () => {
-    socket.send("disconnected / server stopped");
+    console.log("Client disconnected");
+    rooms.forEach((room, roomId) => {
+      if (room.clients.has(socket)) {
+        room.clients.delete(socket);
+      }
+
+      if (room.clients.size === 0) {
+        rooms.delete(roomId);
+      }
+    });
   });
 });
