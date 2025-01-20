@@ -64,12 +64,14 @@ export const ChatRoom = ({ userData }: ChatRoomProps) => {
 
         if (receivedMessage.type === SocketMessagesType.CHAT) {
           console.log(receivedMessage.newMessage)
-          setChats([...chats, receivedMessage.newMessage]);
+          // const allChats = [...chats, receivedMessage.newMessage];
+          setChats((prevChats) => [...prevChats, receivedMessage.newMessage]);
           console.log('check' , [...chats, receivedMessage.newMessage])
         }
       };
     }
   }, [userData, ws]);
+  console.log('chats', chats)
   const onSendMessage: SubmitHandler<MessageInputs> = (data) => {
     const msgLength = data.message.length;
     // todo => fix this magical strings and numbers
@@ -109,9 +111,9 @@ export const ChatRoom = ({ userData }: ChatRoomProps) => {
         </p>
       </div>
 
-      <div className="h-72 border-2 overflow-y-auto border-gray-400 border-opacity-30 mt-3 p-4 space-y-2">
+      <div className="h-72 border-2 overflow-y-scroll border-gray-400 border-opacity-30 mt-3 p-4 space-y-2">
         {chats?.map((chat: ChatInterface, i) => {
-          return i % 2 === 0 ? (
+          return userData.username === chat.username ? (
             <div key={i} className={`flex flex-col items-end `}>
               <span className="text-xs text-gray-500 text-muted-foreground mb-0.5 ">
                 {chat.username}
