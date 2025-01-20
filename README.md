@@ -7,10 +7,10 @@ A **real-time chat application** built with **WebSockets** that allows users to 
 ## 🎥 Demo
 
 📌 **GIF Preview:**  
-![Demo GIF](./assets/demo.gif)
+![Demo GIF](./client/src/assets/gif/chat-app1.gif)
 
 📌 **Screenshot:**  
-![App Screenshot](./assets/screenshot.png)
+![App Screenshot](./client/src/assets/images/chat-app.png)
 
 ---
 
