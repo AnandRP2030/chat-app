@@ -65,6 +65,7 @@ wss.on("connection", (socket: WebSocket) => {
           type: SocketMessagesType.JOIN,
           message: `Successfully joined the room ${roomId}`,
           joiningStatus: JOINING_STATUS.SUCCESS,
+          totalUsers: existingRoom.clients.size,
           previousMessages: existingRoom.messages,
         };
         socket.send(JSON.stringify(successResponse));

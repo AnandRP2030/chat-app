@@ -4,11 +4,9 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import { useWebSocket } from "./hooks/useWebsocket";
 function App() {
-  const [messages, setMessages] = useState<string[]>([]);
-
   const { ws } = useWebSocket();
 
-  // creaet connection
+  // create connection
   useEffect(() => {
 
     if (ws && ws.readyState === WebSocket.OPEN) {

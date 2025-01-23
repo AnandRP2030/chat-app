@@ -24,7 +24,7 @@ interface ChatRoomProps {
 
 export const ChatRoom = ({ userData }: ChatRoomProps) => {
   const [chats, setChats] = useState<ChatInterface[]>([]);
-
+  const [totalUsers, setTotalUsers] = useState(0);
   const copyRoomId = () => {
     navigator.clipboard.writeText(userData.roomId);
     showToast({
@@ -59,19 +59,20 @@ export const ChatRoom = ({ userData }: ChatRoomProps) => {
           receivedMessage.type === SocketMessagesType.JOIN &&
           receivedMessage.joiningStatus === JOINING_STATUS.SUCCESS
         ) {
+          setTotalUsers(receivedMessage.totalUsers);
           setChats(receivedMessage.previousMessages);
         }
 
         if (receivedMessage.type === SocketMessagesType.CHAT) {
-          console.log(receivedMessage.newMessage)
+          console.log(receivedMessage.newMessage);
           // const allChats = [...chats, receivedMessage.newMessage];
           setChats((prevChats) => [...prevChats, receivedMessage.newMessage]);
-          console.log('check' , [...chats, receivedMessage.newMessage])
+          console.log("check", [...chats, receivedMessage.newMessage]);
         }
       };
     }
   }, [userData, ws]);
-  console.log('chats', chats)
+  console.log("chats", chats);
   const onSendMessage: SubmitHandler<MessageInputs> = (data) => {
     const msgLength = data.message.length;
     // todo => fix this magical strings and numbers
@@ -107,7 +108,7 @@ export const ChatRoom = ({ userData }: ChatRoomProps) => {
           </span>
         </p>
         <p>
-          Users: <span>1</span>
+          Users: <span>{totalUsers}</span>
         </p>
       </div>
 
