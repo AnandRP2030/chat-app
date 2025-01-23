@@ -10,7 +10,8 @@ export enum ToastMessages {
     ENTER_NAME = "Please enter your name.",
     ROOM_JOINED = "Joined",
     PROVIDE_ROOM_ID = "Please provide the room Id.",
-    INVALID_ROOM_ID = "Invalid room Id"
+    INVALID_ROOM_ID = "Invalid room Id",
+    LARGE_MESSAGE_WARNING = "Please send small message."
 }
 
 export enum ToastIcons {
@@ -20,5 +21,6 @@ export enum ToastIcons {
     ROOM_ID_COPIED = "😊",
     ENTER_NAME = "🥲",
     PROVIDE_ROOM_ID = "👿",
-    INVALID_ROOM_ID = "😑"
+    INVALID_ROOM_ID = "😑",
+    LARGE_MESSAGE_WARNING = "🦣"
 }

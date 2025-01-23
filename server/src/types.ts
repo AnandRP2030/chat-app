@@ -9,4 +9,3 @@ export enum JOINING_STATUS {
     SUCCESS = "success",
     FAILED = "failed"
 }
-

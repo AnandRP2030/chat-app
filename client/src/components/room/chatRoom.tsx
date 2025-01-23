@@ -25,6 +25,7 @@ interface ChatRoomProps {
 export const ChatRoom = ({ userData }: ChatRoomProps) => {
   const [chats, setChats] = useState<ChatInterface[]>([]);
   const [totalUsers, setTotalUsers] = useState(0);
+  const maximumCharacterLimit = 50;
   const copyRoomId = () => {
     navigator.clipboard.writeText(userData.roomId);
     showToast({
@@ -72,14 +73,13 @@ export const ChatRoom = ({ userData }: ChatRoomProps) => {
       };
     }
   }, [userData, ws]);
-  console.log("chats", chats);
   const onSendMessage: SubmitHandler<MessageInputs> = (data) => {
     const msgLength = data.message.length;
     // todo => fix this magical strings and numbers
-    if (msgLength > 50) {
+    if (msgLength > maximumCharacterLimit) {
       showToast({
-        icon: "🥲",
-        toastMsg: "Please send small messages.",
+        icon: ToastIcons.LARGE_MESSAGE_WARNING,
+        toastMsg: ToastMessages.LARGE_MESSAGE_WARNING,
       });
       return;
     }
