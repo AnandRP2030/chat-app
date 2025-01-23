@@ -1,11 +1,7 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { createRoomId } from "./utils/createRoomId";
 import { JOINING_STATUS, SocketMessagesType } from "./types";
-import dotenv from 'dotenv';
-import { connectDb } from "./db/connectDb";
-import {MessageModel} from './models/Message'
-dotenv.config();
-connectDb();
+import { MAX_ROOMS, MAX_MESSAGES } from "./config/roomConfig.js";
 const wss = new WebSocketServer({ port: 8080 });
 
 interface Room {
@@ -24,8 +20,16 @@ wss.on("connection", (socket: WebSocket) => {
       const parsedMessage = JSON.parse(message.toString());
 
       if (parsedMessage.type === SocketMessagesType.CREATE) {
+        if (rooms.size >= MAX_ROOMS) {
+          const oldestRoomId = rooms.keys().next().value;
+          if (oldestRoomId) {
+            rooms.delete(oldestRoomId);
+            console.log(
+              `Room ${oldestRoomId} removed. Maximum numbers reached${MAX_ROOMS}`
+            );
+          }
+        }
         const roomId = createRoomId();
-
         rooms.set(roomId, {
           roomId,
           clients: new Set([socket]),
@@ -75,15 +79,10 @@ wss.on("connection", (socket: WebSocket) => {
         const { roomId, username, message } = parsedMessage.payload;
         const room = rooms.get(roomId);
         if (!room) return;
-        const savedMessage = new MessageModel({
-          roomId, 
-          username,
-          message,
-        });
-
-        await savedMessage.save();
-
-        
+        // if users maximum messages exceeds, delete the first msg. 
+        if (room.messages.length >= MAX_MESSAGES) {
+          room.messages.shift()
+        }
         const chatMessage = { username, message };
         room.messages.push(chatMessage);
         const res = {
@@ -93,8 +92,9 @@ wss.on("connection", (socket: WebSocket) => {
             message,
           },
         };
+        const convertedRes = JSON.stringify(res);
         room.clients.forEach((client) => {
-          client.send(JSON.stringify(res));
+          client.send(convertedRes);
         });
       }
     } catch (error) {
