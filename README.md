@@ -77,3 +77,6 @@ npm run dev
 2️⃣ **Share Room ID:** Copy and share the Room ID with your friends.  
 3️⃣ **Join a Room:** Enter the Room ID in the "Join Room" field and start chatting.  
 4️⃣ **Enjoy Real-Time Messaging!** 🚀
+
+
+
